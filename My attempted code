@@ -1,0 +1,229 @@
+/* Pin Assignments for MOTORS*/
+int RIGHT_MOTOR = 11;  // Right Motor is connected to PIN 11
+int LEFT_MOTOR  =  5;  // Left Motor is connected to PIN 5
+  
+/* Set Values for MOTOR_ON and MOTOR_OFF*/
+int MOTOR_ON = 255; 
+int MOTOR_OFF = 0;
+
+/* Set the pins for the sensors */
+int RIGHT_SENSOR = A5;
+int LEFT_SENSOR = A0;
+int MIDDLE_SENSOR = A3;
+
+/* Set the pins for yellow front lights and rear brake lights */
+int BRAKE_LIGHTS = 7;
+int TURN_LEFT = 3;
+int TURN_RIGHT = 10;
+
+int RIGHT_INDICATOR = TURN_RIGHT;
+int LEFT_INDICATOR = TURN_LEFT;
+int MIDDLE_INDICATOR = BRAKE_LIGHTS;
+
+/* Variables for your analog sensor inputs */
+int left_sensor_mid = 511;
+int right_sensor_mid = 511;
+int middle_sensor_mid = 511;
+
+
+
+  
+   
+void setup() {
+  // put your setup code here, to run once:
+  // Pins Connected to the Motors are for output
+  pinMode(RIGHT_MOTOR, OUTPUT);
+  pinMode(LEFT_MOTOR, OUTPUT);
+  
+  // Pins connected to red and yellow leds are for output
+  pinMode(RIGHT_INDICATOR, OUTPUT);
+  pinMode(LEFT_INDICATOR, OUTPUT);
+  pinMode(MIDDLE_INDICATOR, OUTPUT);
+  
+  // Calibrate the 3 sensors
+  right_sensor_mid = calibrate(RIGHT_SENSOR, RIGHT_INDICATOR);
+  left_sensor_mid = calibrate(LEFT_SENSOR, LEFT_INDICATOR);
+  middle_sensor_mid = calibrate(MIDDLE_SENSOR, MIDDLE_INDICATOR);
+
+}
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  
+  //Turn on LED's
+  
+  //digitalWrite(RIGHT_INDICATOR, HIGH);
+  //digitalWrite(LEFT_INDICATOR, HIGH);
+  //digitalWrite(MIDDLE_INDICATOR, HIGH);
+  
+  // RIGHT TURN
+  //turn_right();
+  
+  // LEFT TURN
+  //turn_left();
+  
+  // GO STRAIGHT
+  //int start_time = millis();
+  //int stop_time = start_time + 100000;
+  //go_straight();
+  
+  // Did I see the line on my right hand sensor
+  boolean saw_right = value_lower_than_mid(RIGHT_SENSOR, right_sensor_mid, RIGHT_INDICATOR);
+  
+  // Did I see the light on my left hand sensor
+  boolean saw_left = value_lower_than_mid(LEFT_SENSOR, left_sensor_mid, LEFT_INDICATOR);
+  
+  // Did I see the light on my middle sensor
+  boolean saw_middle = value_higher_than_mid(MIDDLE_SENSOR, middle_sensor_mid, MIDDLE_INDICATOR);
+  
+  move_car(saw_right, saw_left, saw_middle);
+
+}
+
+void move_car(boolean saw_right, boolean saw_left, boolean saw_middle)
+{
+  //go_straight();
+  
+  //turn_left();
+  
+  //turn_right();
+  
+  if(saw_middle == true)
+ {
+  // if sensor value is less than sensor mid do something
+  stop_car();
+ } 
+else if  ((saw_left == true) && (saw_right == false))
+ {
+  // if sensor value is greater than sensor mid do something
+    turn_left();
+ }
+else if  ((saw_left == false) && (saw_right == true))
+ {
+  // if sensor value is equal to sensor mid do something
+  turn_right();
+ }
+// ... have as many else if statements as you want here 
+else if ((saw_left == false) && (saw_right == false))
+ {
+  // do something else
+  go_straight();
+ }
+  
+}
+
+void go_straight()
+{
+  
+  analogWrite(RIGHT_MOTOR, MOTOR_ON);
+  analogWrite(LEFT_MOTOR, MOTOR_ON);
+  
+}
+
+void turn_right()
+{
+ 
+  analogWrite(RIGHT_MOTOR, MOTOR_OFF);
+  analogWrite(LEFT_MOTOR, MOTOR_ON);
+  
+  
+}
+
+void turn_left()
+{
+ 
+  
+  analogWrite(RIGHT_MOTOR, MOTOR_ON);
+  analogWrite(LEFT_MOTOR, MOTOR_OFF);
+   
+}
+
+void stop_car()
+{
+  analogWrite(RIGHT_MOTOR, MOTOR_OFF);
+  analogWrite(LEFT_MOTOR, MOTOR_OFF);
+  
+}
+boolean value_lower_than_mid(int SENSOR_PIN, int SENSOR_MID, int SENSOR_INDICATOR)
+{
+  boolean lower_than_mid = false;
+  
+  digitalWrite(SENSOR_INDICATOR, LOW);
+  
+  int sensor_value = analogRead(SENSOR_PIN);
+  
+  
+  if (sensor_value <= (SENSOR_MID - 5))
+  {
+    lower_than_mid = true;
+    digitalWrite(SENSOR_INDICATOR, HIGH);
+    
+  }
+  
+  return lower_than_mid;
+}
+
+
+boolean value_higher_than_mid(int SENSOR_PIN, int SENSOR_MID, int SENSOR_INDICATOR)
+{
+  boolean higher_than_mid = false;
+  
+  digitalWrite(SENSOR_INDICATOR, LOW);
+  
+  int sensor_value = analogRead(SENSOR_PIN);
+  
+  
+  if (sensor_value > (SENSOR_MID + 5))
+  {
+    higher_than_mid = true;
+    digitalWrite(SENSOR_INDICATOR, HIGH);
+    
+  }
+  
+  return higher_than_mid;
+}
+
+int calibrate(int SENSOR_PIN, int INDICATOR_PIN)
+{
+  int sensor_mid = 0;
+  int sensor_low = 1023;
+  int sensor_high = 0;
+  
+  unsigned long current_time = millis();
+  unsigned long end_time = current_time + 5000;
+  
+  // Turn on your indicator light here (Set to high)
+  digitalWrite(INDICATOR_PIN, HIGH);
+  
+  while (current_time < end_time)
+  {
+    
+    // Now update the current time
+    current_time = millis();
+    
+    // Read the value of the sensor
+    int sensor_value = analogRead(SENSOR_PIN);
+    
+    // Record the minimum sensor value
+    if (sensor_value < sensor_low)
+    {
+      sensor_low = sensor_value;
+    }
+    
+    // Record the maximum sensor value
+    if (sensor_value > sensor_high)
+    {
+      sensor_high = sensor_value;
+      
+    }
+    
+  } // Calibrate the sensor for 5 seconds
+  
+  // Calculate the median (middle) sensor reading
+  sensor_mid = (sensor_high + sensor_low)/2;
+ 
+
+  
+  return sensor_mid;
+}
