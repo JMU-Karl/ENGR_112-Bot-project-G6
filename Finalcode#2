@@ -1,0 +1,46 @@
+int leftPin = A0; // analog input pin for left sensor
+int rightPin = A1; // analog input pin for right sensor
+int threshold = 500; // threshold value for line detection
+
+int leftMotorDir = 2; // digital output pin for left motor direction
+int leftMotorPWM = 3; // digital output pin for left motor speed
+int rightMotorDir = 4; // digital output pin for right motor direction
+int rightMotorPWM = 5; // digital output pin for right motor speed
+
+void setup() {
+  pinMode(leftMotorDir, OUTPUT);
+  pinMode(leftMotorPWM, OUTPUT);
+  pinMode(rightMotorDir, OUTPUT);
+  pinMode(rightMotorPWM, OUTPUT);
+}
+
+void loop() {
+  int leftVal = analogRead(leftPin);
+  int rightVal = analogRead(rightPin);
+
+  if (leftVal > threshold && rightVal > threshold) {
+    // both sensors are off the line, stop the motors
+    digitalWrite(leftMotorDir, LOW);
+    digitalWrite(leftMotorPWM, 0);
+    digitalWrite(rightMotorDir, LOW);
+    digitalWrite(rightMotorPWM, 0);
+  } else if (leftVal > threshold && rightVal <= threshold) {
+    // left sensor is off the line, turn right
+    digitalWrite(leftMotorDir, LOW);
+    analogWrite(leftMotorPWM, 100);
+    digitalWrite(rightMotorDir, HIGH);
+    analogWrite(rightMotorPWM, 100);
+  } else if (leftVal <= threshold && rightVal > threshold) {
+    // right sensor is off the line, turn left
+    digitalWrite(leftMotorDir, HIGH);
+    analogWrite(leftMotorPWM, 100);
+    digitalWrite(rightMotorDir, LOW);
+    analogWrite(rightMotorPWM, 100);
+  } else {
+    // both sensors are on the line, go straight
+    digitalWrite(leftMotorDir, HIGH);
+    analogWrite(leftMotorPWM, 100);
+    digitalWrite(rightMotorDir, HIGH);
+    analogWrite(rightMotorPWM, 100);
+  }
+}
