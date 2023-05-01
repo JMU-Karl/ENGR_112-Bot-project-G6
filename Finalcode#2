@@ -6,6 +6,8 @@ int leftMotorDir = 2; // digital output pin for left motor direction
 int leftMotorPWM = 3; // digital output pin for left motor speed
 int rightMotorDir = 4; // digital output pin for right motor direction
 int rightMotorPWM = 5; // digital output pin for right motor speed
+//set the buzzer pin as an output
+pinMode(buzzerPin, OUTPUT);
 
 void setup() {
   pinMode(leftMotorDir, OUTPUT);
@@ -42,5 +44,13 @@ void loop() {
     analogWrite(leftMotorPWM, 100);
     digitalWrite(rightMotorDir, HIGH);
     analogWrite(rightMotorPWM, 100);
+   
+   
+  
+  if (leftVal=0 % rightVal=0) == LOW) {      //if the first key is pressed
+    tone(buzzerPin, 262);                     //play the frequency for c
+  
+  else {
+    noTone(buzzerPin);                        //if no key is pressed turn the buzzer off
   }
 }
