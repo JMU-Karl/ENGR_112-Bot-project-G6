@@ -1,0 +1,82 @@
+int leftPin = A0; // analog input pin for left sensor
+int rightPin = A1; // analog input pin for right sensor
+int threshold = 200; // threshold value for line detection
+
+int leftMotorDir = 2; // digital output pin for left motor direction
+int leftMotorPWM = 3; // digital output pin for left motor speed
+int rightMotorDir = 4; // digital output pin for right motor direction
+int rightMotorPWM = 5; // digital output pin for right motor speed
+
+int buzzerPin = 6; // digital output pin for buzzer
+int ledPin = 7; // digital output pin for LED
+
+int photoCellPin = A2; // analog input pin for photocell
+int photoCellThreshold = 100; // threshold value for detecting light
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(leftMotorDir, OUTPUT);
+  pinMode(leftMotorPWM, OUTPUT);
+  pinMode(rightMotorDir, OUTPUT);
+  pinMode(rightMotorPWM, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  pinMode(leftPin, INPUT);
+  pinMode(rightPin, INPUT);
+}
+
+void loop() {
+  int leftVal = analogRead(leftPin);
+  int rightVal = analogRead(rightPin);
+
+  float proximityleft = (float)leftVal * 5.0 / 1023.0;
+  float proximityright = (float)rightVal * 5.0 / 1023.0;
+  Serial.print("Left Sensor: ");
+  Serial.println(proximityleft);
+  Serial.print("Right Sensor: ");
+  Serial.println(proximityright);
+  delay(100);
+
+  if (leftVal > threshold && rightVal > threshold) {
+    // both sensors are on the line, go straight
+    digitalWrite(leftMotorDir, HIGH);
+    analogWrite(leftMotorPWM, 100);
+    digitalWrite(rightMotorDir, HIGH);
+    analogWrite(rightMotorPWM, 100);
+    digitalWrite(buzzerPin, LOW);
+    digitalWrite(ledPin, LOW);
+  } else if (leftVal > threshold && rightVal <= threshold) {
+    // left sensor is off the line, turn right
+    digitalWrite(leftMotorDir, LOW);
+    analogWrite(leftMotorPWM, 100);
+    digitalWrite(rightMotorDir, HIGH);
+    analogWrite(rightMotorPWM, 100);
+    digitalWrite(buzzerPin, LOW);
+    digitalWrite(ledPin, HIGH);
+  } else if (leftVal <= threshold && rightVal > threshold) {
+    // right sensor is off the line, turn left
+    digitalWrite(leftMotorDir, HIGH);
+    analogWrite(leftMotorPWM, 100);
+    digitalWrite(rightMotorDir, LOW);
+    analogWrite(rightMotorPWM, 100);
+    digitalWrite(buzzerPin, LOW);
+    digitalWrite(ledPin, HIGH);
+  } else {
+    // both sensors are off the line, stop the motors and play a tone on the buzzer
+    digitalWrite(leftMotorDir, LOW);
+    digitalWrite(leftMotorPWM, 0);
+    digitalWrite(rightMotorDir, LOW);
+    digitalWrite(rightMotorPWM, 0);
+    tone(buzzerPin, 1000, 500);
+    digitalWrite(ledPin, HIGH);
+  }
+
+  int photoCellVal = analogRead(photoCellPin);
+  if (photoCellVal < photoCellThreshold) {
+    // it's dark, turn on the LED
+    digitalWrite(ledPin, HIGH);
+  } else {
+    // it's light, turn off the LED
+    digitalWrite(ledPin, LOW);
+  }
+}
