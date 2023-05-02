@@ -1,0 +1,47 @@
+/******************************************************************************
+QRD1114_Proximity_Example.ino
+Example sketch for SparkFun's QRD1114 Reflectance Proximity Sensor
+  (https://www.sparkfun.com/products/246)
+Jim Lindblom @ SparkFun Electronics
+May 2, 2016
+
+Connect two QRD1114 sensors, 330 resistor and 10k resistor as follows:
+
+QRD1114 Pin ---- Arduino ---- Resistors
+    1              A0      10k Pull-up to 5V
+    2              GND
+    3                      330 Resistor to 5V
+    4              GND
+
+As an object comes closer to the QRD1114, the voltage on A0 should go down.
+
+Development environment specifics:
+Arduino 1.6.7
+******************************************************************************/
+
+const int QRD1114_PIN_1 = A0; // Sensor 1 output voltage
+const int QRD1114_PIN_2 = A1; // Sensor 2 output voltage
+
+void setup() 
+{
+  Serial.begin(9600);
+  pinMode(QRD1114_PIN_1, INPUT);
+  pinMode(QRD1114_PIN_2, INPUT);
+}
+
+void loop() 
+{
+  // Read in the ADC and convert it to a voltage for Sensor 1:
+  int proximityADC_1 = analogRead(QRD1114_PIN_1);
+  float proximityV_1 = (float)proximityADC_1 * 5.0 / 1023.0;
+  Serial.print("Sensor 1 voltage: ");
+  Serial.println(proximityV_1);
+
+  // Read in the ADC and convert it to a voltage for Sensor 2:
+  int proximityADC_2 = analogRead(QRD1114_PIN_2);
+  float proximityV_2 = (float)proximityADC_2 * 5.0 / 1023.0;
+  Serial.print("Sensor 2 voltage: ");
+  Serial.println(proximityV_2);
+
+  delay(100);
+}
